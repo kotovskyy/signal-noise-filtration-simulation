@@ -37,20 +37,26 @@ def MSE(first: np.array, second: np.array) -> float:
     """
     if first.size != second.size:
         raise ValueError(f"Number of samples in first and second arrays must match! (first={(first.size)}, second={(second.size)})")
-    mse = np.sum(np.square(first-second)) / first.size
-    return mse    
+    return np.mean(np.square(first-second))
     
 
-h = 30
+noise_scale = 0.2
+h_array = np.arange(1, 61, 1)  
 t = np.linspace(0, 2*np.pi, 628)
 function = np.sin(t)
-noise = np.random.randn(t.size) / 10
+noise = noise_scale * np.random.randn(t.size) 
 noised_function = function + noise
-filtered = movingAverage(noised_function, h)
+mse_array = np.zeros(h_array.size)
 
-print(f"MSE = {MSE(function[h:], filtered)}")
+for h in h_array:
+    filtered = movingAverage(noised_function, h)
+    mse_array[h-1] = MSE(filtered, function[h:])
 
-plt.plot(t, noised_function)
-plt.plot(t, function)
-plt.plot(t[h:], filtered)
+min_mse = np.argmin(mse_array)
+print(f"MIN MSE = {mse_array[min_mse]}, h = {min_mse+1}")
+
+# plt.plot(t, noised_function)
+# plt.plot(t, function)
+# plt.plot(t[h:], filtered)
+plt.plot(h_array, mse_array)
 plt.show()
