@@ -40,23 +40,38 @@ def MSE(first: np.array, second: np.array) -> float:
     return np.mean(np.square(first-second))
     
 
-noise_scale = 0.2
-h_array = np.arange(1, 61, 1)  
-t = np.linspace(0, 2*np.pi, 628)
+noise_scale = 0.15
+h_array = np.arange(1, 21, 1)  
+t = np.linspace(0, 2*np.pi, 1000)
 function = np.sin(t)
-noise = noise_scale * np.random.randn(t.size) 
-noised_function = function + noise
+
+n_samples = 250
+samples_scale = int(t.size / n_samples)
+samples_array = np.sin(t[::samples_scale])
+
+
+noise = noise_scale * np.random.randn(n_samples) 
+noised_function = samples_array + noise
 mse_array = np.zeros(h_array.size)
 
 for h in h_array:
     filtered = movingAverage(noised_function, h)
-    mse_array[h-1] = MSE(filtered, function[h:])
+    mse_array[h-1] = MSE(filtered, function[h*samples_scale::samples_scale])
 
-min_mse = np.argmin(mse_array)
-print(f"MIN MSE = {mse_array[min_mse]}, h = {min_mse+1}")
+# h = 7
+# filtered = movingAverage(samples_array, h)
+# print(f"FILTERED SIZE : {filtered.size}")
+# print
 
-# plt.plot(t, noised_function)
+# plt.scatter(t[::samples_scale], noised_function)
 # plt.plot(t, function)
 # plt.plot(t[h:], filtered)
-plt.plot(h_array, mse_array)
+min_mse = np.argmin(mse_array)
+print(f"MIN MSE = {mse_array[min_mse]}, h = {h_array[min_mse]}")
+
+
+plt.scatter(t[::samples_scale], noised_function, color="red", marker='.')
+plt.plot(t, function)
+plt.plot(t[5*samples_scale::samples_scale], movingAverage(noised_function, 5)) 
+# plt.plot(h_array, mse_array)
 plt.show()
