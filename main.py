@@ -44,7 +44,7 @@ def MSE(first: np.array, second: np.array) -> float:
 """
     Main function variables:
     
-    h_array: np.array - array of 'h' values to loop through
+    h_array: np.array - array of h values ['h_min', 'h_max') with step 1
     t: np.array - array of original function argument values
     function: np.array - array of original function values
 """
