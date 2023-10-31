@@ -1,46 +1,9 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-def movingAverage(signal: np.array, h: int) -> np.array:
-    """
-        Simple moving average filter.
-        
-        Moving average filter made for smoothing signal's noise.
-        !Important!
-        This function cuts `h` first samples of the `signal`. For 
-        input `signal` of size `(1, 628)` output signal will have 
-        size `(1, 628-h)` and first `h` samples will be lost.
-        
-        Arguments:
-        signal: np.array - signal to filter
-        h: int - number of samples to consider
-        
-        Returns:
-        np.array - filtered signal of size `(n-h)` 
-    """
+import utils
     
-    filtered_signal = np.zeros(signal.size - h)
-    for i in range(filtered_signal.size):
-        filtered_signal[i] = 1/h * np.sum(signal[i:h+i])
-    return filtered_signal
-
-def MSE(first: np.array, second: np.array) -> float:
-    """"
-        Calculates the Mean Squared Error of two passed arrays.
-        
-        Arguments:
-        first: np.array - first array
-        second: np.array - second array
-        
-        Returns:
-        float - MSE of two passed arrays
-    """
-    if first.size != second.size:
-        raise ValueError(f"Number of samples in first and second \
-            arrays must match! (first={(first.size)}, second={(second.size)})")
-    return np.mean(np.square(first-second))
     
-
 """
     Main function variables:
     
@@ -65,8 +28,7 @@ function = np.sin(t)
     samples_array: np.array - array of values of original function 
                               for each samples_t value
     noise: np.array - array of random noise values from normal distribution
-    std_dev: float (0, +inf] - value for scailing noise applied
-                                   to each sample
+    std_dev: float (0, +inf] - standard deviation of generated noise
     noised_samples: np.array - array of sample values with noise
 """
 
@@ -81,8 +43,8 @@ noised_samples = samples_array + noise
 mse_array = np.zeros(h_array.size) 
 
 for h in h_array:
-    filtered = movingAverage(noised_samples, h)
-    mse_array[h-1] = MSE(filtered, samples_array[h:])
+    filtered = utils.movingAverage(noised_samples, h)
+    mse_array[h-1] = utils.MSE(filtered, samples_array[h:])
 
 
 min_mse = np.argmin(mse_array)
@@ -90,7 +52,7 @@ h = h_array[min_mse]
 mse = mse_array[min_mse]
 print(f"MIN MSE = {mse}, h = {h}")
 
-filtered = movingAverage(noised_samples, h)
+filtered = utils.movingAverage(noised_samples, h)
 
 
 plt.figure(figsize=(8, 4))
