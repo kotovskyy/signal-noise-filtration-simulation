@@ -49,8 +49,10 @@ def MSE(first: np.array, second: np.array) -> float:
     function: np.array - array of original function values
 """
 h_min = 1
-h_max = 21
+h_max = 31
 h_array = np.arange(h_min, h_max, 1) 
+
+
 t = np.linspace(0, 2*np.pi, 1000)
 function = np.sin(t)
 
@@ -63,18 +65,20 @@ function = np.sin(t)
     samples_array: np.array - array of values of original function 
                               for each samples_t value
     noise: np.array - array of random noise values from normal distribution
-    noise_scale: float (0, +inf] - value for scailing noise applied
+    std_dev: float (0, +inf] - value for scailing noise applied
                                    to each sample
     noised_samples: np.array - array of sample values with noise
 """
-noise_scale = 0.15
+
 n_samples = 250
 samples_t = np.linspace(0, 2*np.pi, n_samples)
 samples_array = np.sin(samples_t)
-noise = noise_scale * np.random.randn(n_samples) 
+std_dev = 0.5
+noise = std_dev * np.random.randn(n_samples) 
 noised_samples = samples_array + noise
 
-mse_array = np.zeros(h_array.size) # MSE values for each 'h' in 'h_array'
+# MSE values for each 'h' in 'h_array'
+mse_array = np.zeros(h_array.size) 
 
 for h in h_array:
     filtered = movingAverage(noised_samples, h)
@@ -88,6 +92,7 @@ print(f"MIN MSE = {mse}, h = {h}")
 
 filtered = movingAverage(noised_samples, h)
 
+
 plt.figure(figsize=(8, 4))
 plt.plot(t, function,
          label="Funkcja oryginalna")
@@ -96,7 +101,7 @@ plt.plot(samples_t[h:], filtered, '--g',
 plt.scatter(samples_t, noised_samples, 
             color="red", 
             marker='.',
-            label=f"Pomiary zaszumione, noise_scale={noise_scale}")
+            label=f"Pomiary zaszumione, Var(Z)={std_dev**2:.3}")
 plt.yticks(np.arange(-1.25, 1.25, 0.25))
 plt.xticks(np.arange(0.0, 6.5, 0.5))
 plt.xlabel("t")
@@ -106,9 +111,8 @@ plt.legend()
 
 plt.figure(figsize=(8, 4))
 plt.plot(h_array, mse_array, '--o')
-plt.title("Zależność MSE od wartośći h")
 plt.xlabel("h")
 plt.ylabel("MSE(h)")
-plt.xticks(np.arange(0, h_max, 1))
+plt.xticks(np.arange(0, h_max, 2))
 plt.grid()
 plt.show()
