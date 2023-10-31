@@ -65,7 +65,6 @@ function = np.sin(t)
                                    to each sample
     noised_samples: np.array - array of sample values with noise
 """
-noise_scale = 0.15
 n_samples = 250
 variance_min, variance_max = 0, 2.1
 variance = np.arange(variance_min, variance_max, 0.1)
@@ -73,43 +72,33 @@ samples_t = np.linspace(0, 2*np.pi, n_samples)
 samples_array = np.sin(samples_t)
 
 
-mse_array = np.zeros(variance.size) 
 
+h_min = 1
+h_max = 31
+h_array = np.arange(h_min, h_max, 1) 
+mse_array = np.zeros(h_array.size) 
+
+
+h_for_variance = np.zeros(variance.size)
 
 for i, v in enumerate(variance):
     noise =  np.sqrt(v) * np.random.randn(n_samples) 
     noised_samples = samples_array + noise
-    mse_array[i] = MSE(noised_samples, samples_array)
+    
+    for h in h_array:
+        filtered = movingAverage(noised_samples, h)
+        mse_array[h-1] = MSE(filtered, samples_array[h:])
+    
+    min_mse = np.argmin(mse_array)
+    h_opt = h_array[min_mse]
+    mse = mse_array[min_mse]
+    h_for_variance[i] = h_opt
     
 
-min_mse = np.argmin(mse_array)
-mse = mse_array[min_mse]
-var = variance[min_mse]
-print(f"MIN MSE = {mse}, varZ = {var}")
-
-# filtered = movingAverage(noised_samples, var)
-
-# plt.figure(figsize=(8, 4))
-# plt.plot(t, function,
-#          label="Funkcja oryginalna")
-# plt.plot(samples_t[h:], filtered, '--g',
-#          label=f"Pomiary uśrednione, h={h}")
-# plt.scatter(samples_t, noised_samples, 
-#             color="red", 
-#             marker='.',
-#             label=f"Pomiary zaszumione, noise_scale={noise_scale}")
-# plt.yticks(np.arange(-1.25, 1.25, 0.25))
-# plt.xticks(np.arange(0.0, 6.5, 0.5))
-# plt.xlabel("t")
-# plt.ylabel("f(t)")
-# plt.grid()
-# plt.legend()
-
 plt.figure(figsize=(8, 4))
-plt.plot(variance, mse_array, '--o')
-plt.title("Zależność MSE od varZ")
-plt.xlabel("varZ")
-plt.ylabel("MSE(h)")
+plt.plot(variance, h_for_variance, '--o')
+plt.xlabel("Var(Z)")
+plt.ylabel("h")
 plt.xticks(np.arange(0, variance_max, 0.1))
 plt.grid()
 plt.show()
